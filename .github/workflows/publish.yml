@@ -1,0 +1,46 @@
+name: Publish
+on:
+  push:
+    tags: ["python-v*", "typescript-v*"]
+
+jobs:
+  pypi:
+    if: startsWith(github.ref_name, 'python-v')
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # PyPI trusted publishing, no token stored in GitHub
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]" build
+      - run: pytest -q
+      - run: python -m build
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/dist
+
+  npm:
+    if: startsWith(github.ref_name, 'typescript-v')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # npm provenance
+    defaults:
+      run:
+        working-directory: typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+      - run: npm ci || npm install
+      - run: npm test
+      - run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

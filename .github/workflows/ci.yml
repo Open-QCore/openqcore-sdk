@@ -1,0 +1,42 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+      - run: ruff check src tests scripts
+      - if: matrix.python != '3.9'
+        run: mypy src
+
+  typescript:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["18", "20", "22"]
+    defaults:
+      run:
+        working-directory: typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci || npm install
+      - run: npm run typecheck
+      - run: npm test

@@ -1,0 +1,36 @@
+{
+  "name": "openqcore",
+  "version": "0.1.0",
+  "description": "Official TypeScript/JavaScript SDK for the OpenQCore API: chat, voice, Iris (images, video, OCR), knowledge and more.",
+  "keywords": ["openqcore", "ai", "llm", "chat", "voice", "rag", "ocr", "sdk"],
+  "homepage": "https://www.openqcore.com/developers/sdks",
+  "repository": { "type": "git", "url": "git+https://github.com/Open-QCore/openqcore-sdk.git", "directory": "typescript" },
+  "bugs": { "url": "https://github.com/Open-QCore/openqcore-sdk/issues" },
+  "license": "MIT",
+  "author": "OpenQCore <developers@openqcore.com>",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": { "types": "./dist/esm/index.d.ts", "default": "./dist/esm/index.js" },
+      "require": { "types": "./dist/cjs/index.d.ts", "default": "./dist/cjs/index.js" }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && node scripts/fix-cjs.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.4.0"
+  }
+}
