@@ -8,6 +8,7 @@ jobs:
   python:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     defaults:
@@ -15,18 +16,21 @@ jobs:
         working-directory: python
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # uv installs any Python version, including ones setup-python no longer ships
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python }}
-      - run: pip install -e ".[dev]"
-      - run: pytest -q
-      - run: ruff check src tests scripts
+      - run: uv venv
+      - run: uv pip install -e ".[dev]"
+      - run: uv run --no-project pytest -q
+      - run: uv run --no-project ruff check src tests scripts
       - if: matrix.python != '3.9'
-        run: mypy src
+        run: uv run --no-project mypy src
 
   typescript:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         node: ["18", "20", "22"]
     defaults:
